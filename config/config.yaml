@@ -1,0 +1,4 @@
+server:
+  address: 0.0.0.1
+  mode: dev
+  port: 9000
