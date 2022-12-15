@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -15,13 +17,19 @@ import (
 
 func Run(conf *config.Config) {
 	srv := &http.Server{
-		Addr:           conf.Server.Address,
+		Addr: strings.Join(
+			[]string{conf.Server.Address, strconv.Itoa(conf.Server.Port)},
+			":",
+		),
 		Handler:        routers.InitRouter(),
 		MaxHeaderBytes: 1 << 20,
 	}
 
 	go func() {
-		log.Printf("server is runing port: %d\n", conf.Server.Address)
+		log.Printf("server is runing port: %s\n", strings.Join(
+			[]string{conf.Server.Address, strconv.Itoa(conf.Server.Port)},
+			":",
+		))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}

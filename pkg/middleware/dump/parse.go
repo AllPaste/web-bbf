@@ -10,9 +10,8 @@ import (
 )
 
 var (
-	StringMaxLength = 0
-	Newline         = "\n"
-	Indent          = 4
+	Newline = "\n"
+	Indent  = 4
 )
 
 func BeautifyJsonBytes(data []byte, hiddenFields []string) ([]byte, error) {

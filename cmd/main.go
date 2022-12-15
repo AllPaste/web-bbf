@@ -20,5 +20,5 @@ func main() {
 	config.LoadConfig(configPath)
 
 	// 启动服务
-	server.Run(config.Cfg)
+	server.Run(&config.Cfg)
 }

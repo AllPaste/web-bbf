@@ -15,7 +15,7 @@ import (
 func Dump(opts ...Option) gin.HandlerFunc {
 	o := &options{
 		request:      true,
-		response:     false,
+		response:     true,
 		body:         true,
 		headers:      true,
 		cookies:      true,
@@ -84,7 +84,6 @@ func Dump(opts ...Option) gin.HandlerFunc {
 								bodyCache:      bytes.NewBufferString(""),
 								ResponseWriter: ctx.Writer,
 							}
-							ctx.Next()
 						}
 
 						s, err := BeautifyJsonBytes(bts, bodyHiddenFields)
@@ -94,7 +93,6 @@ func Dump(opts ...Option) gin.HandlerFunc {
 								bodyCache:      bytes.NewBufferString(""),
 								ResponseWriter: ctx.Writer,
 							}
-							ctx.Next()
 						}
 
 						strB.WriteString("\nRequest-Body:\n")
@@ -118,11 +116,9 @@ func Dump(opts ...Option) gin.HandlerFunc {
 								bodyCache:      bytes.NewBufferString(""),
 								ResponseWriter: ctx.Writer,
 							}
-							ctx.Next()
 						}
 						strB.WriteString("\nRequest-Body:\n")
 						strB.WriteString(string(s))
-
 					case gin.MIMEMultipartPOSTForm:
 					default:
 					}
@@ -143,13 +139,14 @@ func Dump(opts ...Option) gin.HandlerFunc {
 
 			if o.body {
 				bw, ok := ctx.Writer.(*bodyWriter)
-				if !ok {
-					strB.WriteString("\nbodyWriter was override , can not read bodyCache")
+				if !ok || bw == nil {
+					strB.WriteString("\nbodyWriter was override or nil, can not read bodyCache")
 					if o.convertBytes != nil {
 						o.convertBytes(strB.String())
 					} else {
 						fmt.Println(strB.String())
 					}
+					return
 				}
 				// dump res body
 				if bodyAllowedForStatus(ctx.Writer.Status()) && bw.bodyCache.Len() > 0 {
@@ -183,6 +180,8 @@ func Dump(opts ...Option) gin.HandlerFunc {
 					default:
 					}
 				}
+
+				ctx.Next()
 			}
 		}
 	}

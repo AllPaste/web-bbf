@@ -2,7 +2,7 @@ package config
 
 import "github.com/spf13/viper"
 
-var Cfg *Config
+var Cfg Config
 
 type Config struct {
 	Server Server `mapstructure:"server"`
@@ -17,13 +17,11 @@ type Server struct {
 func LoadConfig(path string) {
 	viper.SetConfigFile(path)
 
-	err := viper.ReadInConfig()
-	if err != nil {
+	if err := viper.ReadInConfig(); err != nil {
 		panic(err)
 	}
 
-	err = viper.Unmarshal(Cfg)
-	if err != nil {
+	if err := viper.Unmarshal(&Cfg); err != nil {
 		panic(err)
 	}
 }

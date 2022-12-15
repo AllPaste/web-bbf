@@ -1,4 +1,4 @@
 server:
-  address: 0.0.0.1
-  mode: dev
+  address: 127.0.0.1
+  mode: debug # debug release test
   port: 9000
