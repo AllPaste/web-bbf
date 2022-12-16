@@ -8,11 +8,22 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
 
+func resetStrB(strB *strings.Builder) {
+	strB.Reset()
+}
+
 func Dump(opts ...Option) gin.HandlerFunc {
+	strBPool := sync.Pool{
+		New: func() interface{} {
+			return new(strings.Builder)
+		},
+	}
+
 	o := &options{
 		request:      true,
 		response:     true,
@@ -34,7 +45,7 @@ func Dump(opts ...Option) gin.HandlerFunc {
 	}
 
 	return func(ctx *gin.Context) {
-		var strB strings.Builder
+		strB := strBPool.Get().(*strings.Builder)
 		if o.request {
 			if o.headers {
 				// dump req header
@@ -47,7 +58,6 @@ func Dump(opts ...Option) gin.HandlerFunc {
 					strB.WriteString(string(s))
 				}
 			}
-
 			if o.body {
 				// dump req body
 				if ctx.Request.ContentLength > 0 {
@@ -146,6 +156,8 @@ func Dump(opts ...Option) gin.HandlerFunc {
 					} else {
 						fmt.Println(strB.String())
 					}
+					resetStrB(strB)
+					strBPool.Put(strB)
 					return
 				}
 				// dump res body
@@ -180,7 +192,7 @@ func Dump(opts ...Option) gin.HandlerFunc {
 					default:
 					}
 				}
-
+				strBPool.Put(strB)
 				ctx.Next()
 			}
 		}
